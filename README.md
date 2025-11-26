@@ -1,7 +1,7 @@
-<H3>ENTER YOUR NAME</H3>
-<H3>ENTER YOUR REGISTER NO.</H3>
+<H3>ENTER YOUR NAME:VINOTH M P</H3>
+<H3>ENTER YOUR REGISTER NO.212223240182</H3>
 <H3>EX. NO.3</H3>
-<H3>DATE:</H3>
+<H3>DATE:20.09.25</H3>
 <H1 ALIGN =CENTER> Implementation of Approximate Inference in Bayesian Networks
 </H1>
 
@@ -35,12 +35,87 @@
 
 
 ## Program:
-Insert your code here
+```
+from pgmpy.models import DiscreteBayesianNetwork
+from pgmpy.factors.discrete import TabularCPD
+from pgmpy.sampling import GibbsSampling
+import networkx as nx
+import matplotlib.pyplot as plt
+alarm_model = DiscreteBayesianNetwork(
+    [
+        ("Burglary", "Alarm"),
+        ("Earthquake", "Alarm"),
+        ("Alarm", "JohnCalls"),
+        ("Alarm", "MaryCalls"),
+    ]
+)
+
+# Defining the parameters using CPT
+from pgmpy.factors.discrete import TabularCPD
+
+cpd_burglary = TabularCPD(
+    variable="Burglary", variable_card=2, values=[[0.999], [0.001]]
+)
+cpd_earthquake = TabularCPD(
+    variable="Earthquake", variable_card=2, values=[[0.998], [0.002]]
+)
+cpd_alarm = TabularCPD(
+    variable="Alarm",
+    variable_card=2,
+    values=[[0.999, 0.71, 0.06, 0.05], [0.001, 0.29, 0.94, 0.95]],
+    evidence=["Burglary", "Earthquake"],
+    evidence_card=[2, 2],
+)
+cpd_johncalls = TabularCPD(
+    variable="JohnCalls",
+    variable_card=2,
+    values=[[0.95, 0.1], [0.05, 0.9]],
+    evidence=["Alarm"],
+    evidence_card=[2],
+)
+cpd_marycalls = TabularCPD(
+    variable="MaryCalls",
+    variable_card=2,
+    values=[[0.1, 0.7], [0.9, 0.3]],
+    evidence=["Alarm"],
+    evidence_card=[2],
+)
+
+# Associating the parameters with the model structure
+alarm_model.add_cpds(
+    cpd_burglary, cpd_earthquake, cpd_alarm, cpd_johncalls, cpd_marycalls
+)
+print("Bayesian Network Structure")
+print(alarm_model)
+G=nx.DiGraph()
+nodes=['Burglary','Earthquake','JohnCalls','MaryCalls']
+edges=[('Burglary','Alarm'),('Earthquake','Alarm'),('Alarm','JohnCalls'),('Alarm','MaryCalls')]
+G.add_nodes_from(nodes)
+G.add_edges_from(edges)
+pos={
+    'Burglary':(0,0),
+    'Earthquake':(2,0),
+    'Alarm':(1,-2),
+    'JohnCalls':(0,-4),
+    'MaryCalls':(2,-4)
+    }
+nx.draw(G,pos,with_labels=True,node_size=1500,node_color="skyblue",font_size=10,font_weight="bold",arrowsize=20)
+plt.title("Bayesian Network: Burglar Alarm Problem")
+plt.show()
+gibbssampler=GibbsSampling(alarm_model)
+num_samples=50000
+samples=gibbssampler.sample(size=num_samples)
+query_variable="Burglary"
+query_result=samples[query_variable].value_counts(normalize=True)
+print("\n Approximate probabilities of {}:".format(query_variable))
+print(query_result)
+```
 
 
 
 ## Output:
-<Show your results>
+
+<img width="611" height="450" alt="494669490-00d70fb5-78c5-4662-9023-93a2deee1271" src="https://github.com/user-attachments/assets/628cffc1-149d-4dbe-b549-31e30f67d0e2" />
 
 ## Result:
 Thus, Gibb's Sampling( Approximate Inference method) is succuessfully implemented using python.
